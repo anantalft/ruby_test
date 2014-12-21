@@ -1,0 +1,381 @@
+
+Tealeaf Academy: An online school for developers
+
+    Open Bookshelf
+    FAQ
+    Curriculum
+    Success Stories
+    Student Login
+
+    Open Bookshelf Cover Page
+    Preface
+        Credits
+        Changelog
+        Copyright
+    Getting Started
+        Introduction
+        Preparations
+    Intro to Programming
+        The Basics
+        Variables
+        Methods
+        Flow Control
+        Loops & Iterators
+        Arrays
+        Hashes
+        Files
+            What is a File?
+            Creating a file
+            Opening Files
+            Deleting A File
+            Exercise 1
+            Overview of File Classes
+            Exercise 2
+            Working with file formats - CSV, Excel, JSON, XML
+            Summary
+        More Stuff
+        Exercises
+    Conclusion
+        Conclusion & Next Steps
+
+Files
+What is a File?
+
+A File represents digital information that exists on durable storage. Up till now, the Ruby code we've worked through has helped us express data in memory, but after closing irb, the variables and objects go away. Files are different. Files can exist before and after a program runs. Files can also be shared and validated to formats that have nothing in common with one another (more on this later).
+
+If you've worked with a word processing application or any application in general before, then you'll know the flow for creating files. This generally involves navigating to the File menu then selecting New File or using any other combination of keyboard shortcuts to accomplish this task.
+
+In this chapter we will create, open, and edit files using Ruby. We will look at how Files fit into the grand scheme of programming and look at examples using common formats: JSON, CSV, XML/HTML, and XLS.
+Creating a file
+
+To create a file in Ruby, we pass the name of the file and the mode we want to assign to File.new. Fire up irb if you haven't already and enter the following:
+
+ irb :001 > my_file = File.new("simple_file.txt", "w+")
+ => #<File:simple_file.txt>
+irb :002 > my_file.close
+
+In the above example, we created a new file with name simple_file.txt and mode w+ for read and write access to the file. The Ruby IO Docs contain an extensive list of modes and options. Note that the file will be created in the directory from which irb was opened.
+
+On the second line, we are closing the file. We want to always close files. Open files will continue to occupy space in memory. It would be like leaving the water running and flooding your basement. This can have serious impact on system performance and safety.
+Opening Files
+
+We open an existing file using File.open. We will pass the file name and a second argument which will decide how the file will be opened. Usually, the following are used:
+
+    r: read-only (starts at beginning of file)
+    w: write-only (if the file exists, overwrites everything in the file)
+    w+: read and write (if the file exists, overwrites everything in the file)
+    a+: read-write (if file exists, starts at end of file. Otherwise creates a new file). Suitable for updating files.
+
+Open File For Reading
+
+Reading file contents is easy in Ruby. Here are two options:
+
+    File.read("file_name") - Spits out entire contents of the file.
+    File.readlines("file_name") - Reads the entire file based on individual lines and returns those lines in an array.
+
+Open File For Writing
+
+Let's make something useful by adding content to simple_file.txt. Note that in most programming languages, including Ruby, the flow for working with files is open-use-close. We can use write or puts to write files. The subtle difference between the two being puts adds a line break to the end of strings, while write does not.
+
+We mentioned before that it's very important to always close files. To help us with this, Ruby will automagically close the file if the open method is called with a block.
+
+Let's see how it works with write:
+
+File.open("simple_file.txt", "w") { |file| file.write("adding first line of text") }
+
+We first open the file with the w option and invoke a block that writes the contents we specify to the file. This way of doing things makes sure the file closes at the end of the block.
+
+File.read("simple_file.txt")
+
+Alternatively, we could open the file, write to it and finally close it. Let's see how that works with puts:
+
+irb :001 >  sample = File.open("simple_file.txt",  "w+")
+ => #<File:simple_file.txt>
+irb :002 > sample.puts("another example of writing to a file.")
+ => nil
+irb :003 > sample.close
+ => nil
+irb :004 > File.read("simple_file.txt")
+ => "another example of writing to a file.\n"
+
+Finally, lets insert more text into simple_file.txt:
+
+irb :005 > File.open("simple_file.txt", "a+") do |file|
+irb :006 >     file << "Here we are with a new line of text"
+irb :007?>   end
+ => #<File:simple_file.txt (closed)>
+irb :008 > File.readlines("simple_file.txt").each do |line|
+irb :009 >     puts line
+irb :010?>   end
+another example of writing to a file.
+Here we are with a new line of text
+ => ["another example of writing to a file.\n", "Here we are with a new line of text"]
+
+In this example, we open the file for reading and updating with a+ mode, declare a variable file as a placeholder for the file and append more text to it with the shovel operator. Note that the file is automatically closed after the operation (the end of the block) and we can use puts or write in place of <<.
+
+irb :001 > File.open("simple_file.txt",  "a+") do |file|
+irb :002 >       file.write "Writing to files in Ruby is simple."
+irb :003?>   end
+ => 35
+irb :004 >
+irb :005 >   File.readlines("simple_file.txt").each_with_index do |line, line_num|
+irb :006 >       puts "#{line_num}: #{line}"
+irb :007?>   end
+0: another example of writing to a file.
+1: Here we are with a new line of textWriting to files in Ruby is simple.
+ => ["another example of writing to a file.\n", "Here we are with a new line of textWriting to files in Ruby is simple."]
+
+Deleting A File
+
+There comes a time when a file is not needed, in which case we want to delete it. We can do that by passing the name or reference to a file we want to delete to File.delete. Let's see it in action:
+
+irb :001 > File.new("dummy_file.txt", "w+")
+ => #<File:dummy_file.txt>
+irb :002 > File.delete("dummy_file.txt")
+ => 1
+
+Be careful, this command can be dangerous as it totally deletes the file from your file system.
+Exercise 1
+
+Let's take one file's contents as input and create a new transformed file as a result:
+
+irb :01 > simple = File.read("simple_file.txt")
+ => "another example of writing to a file.\nHere we are with a new line of textWriting to files in Ruby is simple."
+irb :002 > original = File.new("original_file.txt", "w+")
+ => #<File:original_file.txt>
+ibr :003 > File.open(original, "a") do |file|
+irb :004 >     file.puts simple
+irb :005?>   end
+ => nil
+irb :006 > File.read(original)
+ => "another example of writing to a file.\nHere we are with a new line of textWriting to files in Ruby is simple.\n"
+
+Overview of File Classes
+
+Files are everywhere. As programmers, we are responsible for plenty of files, and that is an understatement.
+
+Files rule everything.
+
+Some of these files make up our programs and others will be the inputs and outputs of the programs we work on. You might be thinking, there are thousands of completely different applications that use files, how do they all work?
+
+A catch all answer would be: It all comes down to the right stuff being in the right kind of files in the right place.
+
+We have already touched on getting the right stuff in files. Those examples are above.
+
+When we are talking about the right kind of files, we mean the type of the file, referred to as the file's Format or Extension.
+
+Being in the right place means it is located in a recognizable directory structure or Path.
+
+In Ruby, the File class is a subclass of IO, a class responsible for representing bidirectional streams. Some famous IO streams you might be familiar with include STDOUT, STDIN and STDERR, which stand for "standard output", "standard input" and "standard error", respectively.
+
+Test it yourself. In irb, type:
+
+irb :001 > File.superclass
+=> IO
+irb :002 > $stdout
+ => #<IO:<STDOUT>>
+irb :003 > $stderr
+ => #<IO:<STDERR>>
+irb :004 > $stdin
+ => #<IO:<STDIN>>
+
+When we talk about files, we are always referring to them in the context of their place in the file structure. Ruby offers us a few classes to interface with files and the file system. In addition to the File class that we've already looked at, there's Dir, which is an interface for manipulating directories and their contents. Another class that is helpful in linking files and directories is Pathname. Read up on these classes here:
+
+    Dir - Dir shares some of File's methods. However, it is not an IO stream.
+
+    Pathname
+    The Pathname class exposes pretty much all of the methods of File and Dir. The advantage to using Pathname is you can declare an instance of it and access the class methods of File and Dir on the instance object.
+
+Note: Depending on your particular Ruby installation, you may need to require Pathname before you can use it. We have included this in the example, just in case. If the return value from the require statement is false, that just means that Pathname was already available.
+
+irb :001 > require 'pathname'
+ => true
+irb :002 > f = File.new("simple_file.txt", "r")
+ => #<File:simple_file.txt>
+irb :003 > pn = Pathname.new(f)
+ => #<Pathname:simple_file.txt>
+irb :004> pn.extname
+ => ".txt"
+irb :005 > File.extname("simple_file.txt")
+ => ".txt"
+
+In the example above we create a file instance, and then use an instance of Pathname to find the extension. We see this is equal to calling the File::extname method.
+Exercise 2
+
+Lets look at the current directory and report the files that have .txt extensions
+
+irb :001 > d = Dir.new(".")
+ => #<Dir:.>
+irb :02 > while file = d.read do
+irb :03 >     puts "#{file} has extension .txt" if File.extname(file) == ".txt"
+irb :04?>   end
+simple_file.txt has extension .txt
+original_file.txt has extension .txt
+ => nil
+
+We can also do this using the Pathname class. We have to require 'pathname' before using it. Here's an example
+
+irb :001 > require 'pathname'
+ => true
+irb :002 > pn = Pathname.new(".")
+irb :003 > pn.entries.each { |f| puts "#{f} has extension .txt" if f.extname == ".txt" }
+simple_file.txt has extension .txt
+original_file.txt has extension .txt
+ => [#<Pathname:simple_file.txt>, #<Pathname:cultures.json>, #<Pathname:ruby_book>, #<Pathname:articles.xml>, #<Pathname:chair.rb>, #<Pathname:.git>, #<Pathname:original_file.txt>, #<Pathname:feedzilla.json>, #<Pathname:slashdot>, #<Pathname:articles.json>, #<Pathname:..>, #<Pathname:.>]
+
+Working with file formats - CSV, Excel, JSON, XML
+
+As you probably know, it's very common for software applications to handle manipulating files. In order for applications to save and parse complex information, it needs to to work with file formats beyond just plain text. Some common formats in business software and modern web applications include CSV, JSON, XML, HTML, and XLS. This section will define these formats, show how to work with them in Ruby, and conclude with an example.
+CSV and XLS/XLSX
+
+These are two formats that are typically used for importing and exporting tabular data commonly found in spreadsheet applications. XLS refers to Microsoft's Excel format. For the purposes of this example, we will just focus on the simple spreadsheets and not advanced features like charts, formulas, and cell styling. Ruby does not have any core or standard support for Microsoft's Excel file format. Thankfully there are a few active open source projects that have brought the XLS format to Ruby. The one we will use in this example is called axlsx.
+
+CSV stands for Comma Separated Values. If CSV was an ice cream, it would be vanilla. Each data cell is separatd by a comma or semicolon and each line is a row of tabular data. The Ruby Std-lib does support csv files with the built-in CSV class.
+JSON and XML/HTML
+
+Some data doesn't fit into a box. For plain text, JSON and XML are data formats that let us describe the nested characteristics of data. JSON stands for JavaScript Object Notation. Shortly we will be looking at an example that deals with an article. The article will have three fields, title, link, and summary. In JSON, a newspaper and an article might be represented like this.
+
+{
+  "newspaper_name": "Cooking Today",
+  "issue_date": "November 15th, 2014",
+  "articles": [
+    {
+      "title": "Bacon Cooking",
+      "link": "http://baconcooklove.com",
+      "summary": "Just a few thousand ideas about bacon"
+    },
+    {
+      "title": "Cooking with leftovers",
+      "link": "http://love.com",
+      "summary": "Just a few thousand ideas about tasting love twice"
+    }
+  ]
+}
+
+JSON is commonly compared to a hash because of its key/value pairs, but keep in mind that JSON is unlike a hash in that it is a file format. A JSON file needs to be parsed and converted into an actual Ruby hash. Fortunately, the Ruby standard library supports json and we'll see shortly how to work with JSON files.
+
+XML stands for Extensible Markup Language. XML is a tool for defining domain specific schematics. If you are reading this book, then you have just experienced at least one XML example. Web pages are constructed using HTML, a standardized format of XML for describing elements on the web page. In XML our example above might look like this:
+
+<newspaper>
+  <name>Cooking Today</name>
+  <issue_date>November 15th, 2014</issue_date>
+  <articles>
+    <article>
+      <title>Bacon Cooking</title>
+      <link>http://baconcooklove.com</link>
+      <summary>Just a few thousand ideas about bacon</summary>
+    </article>
+    <article>
+      <title>Cooking with leftovers</title>
+      <link>http://love.com</link>
+      <summary>Just a few thousand ideas about tasting love twice</summary>
+    </article>
+  </articles>
+</newspaper>
+
+There's a very good open source gem for parsing XML files and web pages. It's called Nokogiri and we will be using it in the following exercise.
+`
+Exercise
+
+To wrap up this chapter we are going to work through an exercise that will show us how to interact with these common file types. We will pull news articles from two different sources. One in XML format. One in JSON. We will combine the two lists to a common format, sort them, and save them to CSV and XLS files.
+
+Let's get started. In your command line run these two commands.
+
+$ wget -O feedzilla.json http://api.feedzilla.com/v1/categories/8/articles.json
+$ wget -O slashdot.xml http://rss.slashdot.org/Slashdot/slashdot
+
+wget is a utility that downloads a file or resource. If your system doesnt have wget, just navigate to that URL and save the file somewhere on your computer. wget is a very popular utility so it may be worthwhile to install it, if you don't already have it.
+
+You should have two new files in your directory now. The above commands saved feedzilla.json and slashdot.xml into your directory. Get a good look at these files.
+
+$ cat feedzilla.json
+$ cat slashdot.xml
+
+From the command line, let's install the AXLSX gem for our XLS file, and nogokiri for parsing XML.
+
+First, install axlsx gem.
+
+$ gem install axlsx
+
+After that installs, install nokogiri gem.
+
+$ gem install nokogiri
+
+Great, now open irb. Let's first write some code to open the slashdot.xml file and get its articles' title, url, and summary.
+
+First, we will require the libraries to deal with our mix of file types that we will use throughout this example. Type the following into irb. If you get an error, it probably means one of the gems didn't install correctly. Make sure the gem install instructions above successfully installed the required gems.
+
+require 'json'
+require 'nokogiri'
+require 'axlsx'
+require 'csv'
+
+Time to open up that XML file, find the item elements, and parse them with Nokogiri
+
+slashdot_articles = []
+File.open("slashdot.xml", "r") do |f|
+  doc = Nokogiri::XML(f)
+  slashdot_articles = doc.css('item').map { |i|
+    {
+      title: i.at_css('title').content,
+      link: i.at_css('link').content,
+      summary: i.at_css('description').content
+    }
+  }
+end
+
+At this point, the slashdot_articles array should be populated with the articles from the slashdot XML RSS feed. We have an array of hashes with fields we want to export. We found all the articles with the doc.css('item') call and then chained it through the map block to pull out the fields we want to export. We are ready to do a similar manauver on the feedzilla.json file.
+
+feedzilla_articles =[]
+File.open("feedzilla.json", "r") do |f|
+  items = JSON.parse(f.read)
+  feedzilla_articles= items['articles'].map { |a|
+    {
+      title: a['title'],
+      link: a['url'],
+      summary: a['summary']
+    }
+  }
+end
+
+sorted_articles =  (feedzilla_articles + slashdot_articles).sort_by {|a| a[:title]}
+
+Depending on what contents are in the file, you may need to force the encoding to UTF-8. You can do so like this: encoded_file_content = f.read.force_encoding('UTF-8’) Then pass the encoded_file_content to the JSON.parse method.
+
+As you can see, we pulled out the articles from the feedzilla json file just like we did to the slashdot xml feed. After that we sorted the combined results based on the title.
+
+That just leaves us the task of writing the two export files.
+
+CSV.open("article.csv", "wb") do |csv|
+  sorted_articles.each { |a| csv << [ a[:title], a[:link], a[:summary] ]  }
+end
+
+pkg = Axlsx::Package.new
+pkg.workbook.add_worksheet(:name => "Articles") do |sheet|
+ sorted_articles.each { |a| sheet.add_row [a[:title], a[:link], a[:summary]] }
+end
+pkg.serialize("articles.xlsx")
+
+To fully understand the examples above requires studying the various libraries we were using, and that's beyond the scope of this chapter. The main idea here is to show you how easy it is to work with various file types, given that you study the documentation on how to work with those file types.
+
+There we have it. We selected data with two different formats, parsed the files and built a common format, sorted the data and then exported to CSV and XLS files.
+Summary
+
+We now have insight into what files are and can see their importance. The next time we play a tune on computer or mobile device, we will understand, and be thankful the program knows to play a music file, not a sales report file. We have had a chance to see the basic Open-Use-Close workflow for files in action using Ruby and understand the importance of closing all files we open.
+
+This chapter is a good reference for seeing file import and export tasks in action. We demystified the notion that File Import and Export and file system tasks can easily be handled by Ruby's File class and close relatives Dir and Pathname.
+
+We did not cover it in detail, but depending the kind of system you are working on, your ability to read and write files might be affected by your file system privileges and permissions. If you are not able to read or write files while working through these tasks, double check that you have permissions to create to and read from file system.
+Next:  More Stuff →
+
+    FAQ
+    Curriculum
+    Success Stories
+    About Us
+    Blog
+
+© Copyright 2014 Tealeaf Academy - All Rights Reserved.
+Give us your feedback
+Your email address
+Your comment
+
